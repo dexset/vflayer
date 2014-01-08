@@ -161,30 +161,14 @@
  <resources/>
  <connections>
   <connection>
-   <sender>actionExit</sender>
-   <signal>activated()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>412</x>
-     <y>300</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>radioButton_2</sender>
    <signal>toggled(bool)</signal>
    <receiver>MainWindow</receiver>
    <slot>selectComb(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>414</x>
-     <y>67</y>
+     <x>444</x>
+     <y>95</y>
     </hint>
     <hint type="destinationlabel">
      <x>608</x>
@@ -199,8 +183,8 @@
    <slot>selectScaler(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>406</x>
-     <y>94</y>
+     <x>444</x>
+     <y>124</y>
     </hint>
     <hint type="destinationlabel">
      <x>608</x>

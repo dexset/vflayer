@@ -24,7 +24,19 @@ MainWindow::MainWindow(QWidget *parent) :
     this->connect(ui->actionSave,SIGNAL(activated()),SLOT(saveToFile()));
     this->connect(ui->actionOpen,SIGNAL(activated()),SLOT(loadFromFile()));
     this->connect(ui->actionOpenImage,SIGNAL(activated()),SLOT(loadImageFromFile()));
+    this->connect(ui->actionExit,SIGNAL(activated()),SLOT(saveAndQuit()));
+}
 
+void MainWindow::saveAndQuit()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Save", "Do You want to save changes?",
+                                QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+    {
+        saveToFile();
+    }
+    close();
 }
 
 void MainWindow::loadImageFromFile()

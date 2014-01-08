@@ -38,6 +38,7 @@ public slots:
     void loadImageFromFile();
     void saveToFile();
     void loadFromFile();
+    void saveAndQuit();
     void selectComb(bool);
     void selectScaler(bool);
     void updateTool( const Setting& s);
