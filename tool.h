@@ -49,7 +49,7 @@ public:
 
     virtual void action( const vec2& cur, const vec2& old ) = 0;
 
-    virtual void draw( QPainter& p, vec2 v ) = 0;
+    virtual void draw( QPainter& p, const vec2& v, const vec2& s ) = 0;
 };
 
 class Brush: public Tool
@@ -70,6 +70,8 @@ public:
         sm.push_back( Setting( QString("radius"), 0, 200, rad ) );
         return sm;
     }
+
+    void draw( QPainter &p, const vec2& v, const vec2& s ){ p.drawEllipse( v.x - rad * s.x, v.y - rad * s.y, rad*2 * s.x, rad*2 * s.y ); }
 };
 
 class Comb: public Brush
@@ -95,11 +97,11 @@ public:
     void action( const vec2& cur, const vec2& old )
     {
 
-        int px = cur.x;
-        int py = cur.y;
+        float px = cur.x;
+        float py = cur.y;
 
-        int dx = px - old.x;
-        int dy = py - old.y;
+        float dx = px - old.x;
+        float dy = py - old.y;
 
         for( int i=-rad; i<rad; ++i)
             for( int j=-rad; j<rad; ++j )
@@ -107,23 +109,28 @@ public:
                 int tx = px+i;
                 int ty = py+j;
 
+                float v = ( rad - sqrt(i*i+j*j+1) ) / rad;
+                float kk = 0.01 * ( v > 0 ? v : 0 ) ;
+
                 if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
                 {
                     vec2 vv = wsdata->getVector(tx, ty);
                     if( force == 0 )
                     {
-                        float l = sqrt( vv.x*vv.x + vv.y*vv.y );
-                        vv.x += dx / 2.0;
-                        vv.y += dy / 2.0;
-                        float tml = sqrt( vv.x*vv.x + vv.y * vv.y );
-                        if( tml == 0 ) continue;
-                        vv.x = vv.x / tml * l;
-                        vv.y = vv.y / tml * l;
+                        float l = sqrt( vv.x * vv.x + vv.y * vv.y );
+                        if( l == 0 ) continue;
+                        vv.x /= l;
+                        vv.y /= l;
+                        vv.x += dx * kk;
+                        vv.y += dy * kk;
+                        float l2 = sqrt( vv.x * vv.x + vv.y * vv.y );
+                        if( l2 == 0 ) continue;
+                        vv.x = vv.x / l2 * l;
+                        vv.y = vv.y / l2 * l;
                     }
                     else
                     {
-                        float v = rad - sqrt(i*i+j*j);
-                        float kk = force * 0.01 * ( v > 0 ? v : 0 ) / rad;
+                        kk *= force;
 
                         vv.x += dx * kk;
                         vv.y += dy * kk;
@@ -133,7 +140,6 @@ public:
             }
     }
 
-    void draw( QPainter &p, const vec2 v ){ p.drawEllipse( v.x - rad, v.y - rad, rad*2, rad*2 ); }
 };
 
 class Scaler: public Brush
@@ -183,7 +189,6 @@ public:
                 }
             }
     }
-    void draw( QPainter &p, const vec2 v ){ p.drawEllipse( v.x - rad, v.y - rad, rad*2, rad*2 ); }
 };
 
 #endif // TOOL_H
