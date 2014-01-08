@@ -141,5 +141,5 @@ void WorkspaceWidget::paintEvent(QPaintEvent *)
         }
     }
     paint.setPen( QPen( QColor( 255,255,255 ) ) );
-    prog->getTool()->draw( paint, m_oldpos, vec2( size.x / img.width(), size.y / img.height() ) );
+    prog->getTool()->draw( paint, m_oldpos, vec2( wk, hk ) );
 }

@@ -55,29 +55,22 @@ public:
 class Brush: public Tool
 {
 protected:
-    virtual void brush_action( const vec2& p, const vec2& d, float r, float f, int i, int j ) = 0;
+    virtual void brush_action( const vec2& p, const vec2& d, int i, int j ) = 0;
 
 public:
-    Setting rad, force;
+    Setting rad;
 
-    Brush( float F, float R=50 ):
-        force(QString("force"),0,50,F),
+    Brush( float R=50 ):
         rad(QString("radius"),0,200,R)
     {}
 
-    virtual void setSetting(const Setting &s)
-    {
-        if( s.name == QString("radius") )
-            rad.val = s.val;
-        else if( s.name == QString("force") )
-            force.val = s.val;
-    }
+    void setSetting(const Setting &s)
+    { if( s.name == QString("radius") ) rad.val = s.val; }
 
     SettingList getSettings()
     {
         SettingList sm;
         sm.push_back( rad );
-        sm.push_back( force );
         return sm;
     }
 
@@ -86,7 +79,6 @@ public:
         vec2 dist( cur.x - old.x, cur.y - old.y );
 
         float r = rad.val;
-        float f = force.val;
 
         if( r < 0.01 ) return;
 
@@ -97,7 +89,7 @@ public:
                 int ty = cur.y+j;
 
                 if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
-                    brush_action( cur, dist, r, f, i, j );
+                    brush_action( cur, dist, i, j );
             }
     }
 
@@ -109,13 +101,37 @@ public:
     }
 };
 
-class Comb: public Brush
+class ForceBrush : public Brush
+{
+public:
+    Setting force;
+
+    ForceBrush( float F, float R ): Brush(R), force( QString("force"), 0, 50, F ) { }
+
+    void setSetting(const Setting &s)
+    {
+        if( s.name == QString("force") ) force.val = s.val;
+        else this->Brush::setSetting(s);
+    }
+
+    SettingList getSettings()
+    {
+        SettingList sm = this->Brush::getSettings();
+        sm.push_back( force );
+        return sm;
+    }
+
+};
+
+class Comb: public ForceBrush
 {
 protected:
-    void brush_action(const vec2 &p, const vec2 &d, float r, float f, int i, int j)
+    void brush_action(const vec2 &p, const vec2 &d, int i, int j)
     {
         int tx = p.x+i;
         int ty = p.y+j;
+        float r = rad.val;
+        float f = force.val;
 
         float v = ( r - sqrt(i*i+j*j+1) ) / r;
         float kk = f * 0.01 * ( v > 0 ? v : 0 ) ;
@@ -130,16 +146,18 @@ protected:
 
 public:
 
-    Comb( float F=5, float R=50 ): Brush(F, R) { }
+    Comb( float F=5, float R=50 ): ForceBrush(F, R) { }
 };
 
-class Scaler: public Brush
+class Scaler: public ForceBrush
 {
 protected:
-    void brush_action(const vec2 &p, const vec2 &d, float r, float f, int i, int j)
+    void brush_action(const vec2 &p, const vec2 &d, int i, int j)
     {
         int tx = p.x+i;
         int ty = p.y+j;
+        float r = rad.val;
+        float f = force.val;
 
         float v = ( r - sqrt(i*i+j*j) ) / r;
         float kk = f * 0.01 * ( v > 0 ? v : 0 );
@@ -156,20 +174,23 @@ protected:
 
 public:
 
-    Scaler( float F=0.5, float R=50 ): Brush(F, R)
+    Scaler( float F=0.5, float R=50 ): ForceBrush(F, R)
     {
         force.min = -25;
         force.max =  25;
     }
 };
 
-class CombNS: public Brush
+class CombNS: public ForceBrush
 {
 protected:
-    void brush_action(const vec2 &p, const vec2 &d, float r, float f, int i, int j)
+    void brush_action(const vec2 &p, const vec2 &d, int i, int j)
     {
         int tx = p.x+i;
         int ty = p.y+j;
+
+        float r = rad.val;
+        float f = force.val;
 
         float v = ( r - sqrt(i*i+j*j+1) ) / r;
         float kk = f * 0.01 * ( v > 0 ? v : 0 );
@@ -196,7 +217,7 @@ protected:
 
 public:
 
-    CombNS( float F=5, float R=50 ): Brush(F, R) { }
+    CombNS( float F=5, float R=50 ): ForceBrush(F, R) { }
 };
 
 #endif // TOOL_H
