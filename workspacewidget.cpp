@@ -7,14 +7,16 @@ WorkspaceWidget::WorkspaceWidget(QWidget *parent, Program *p) :
 {
     offset.x = 0;
     offset.y = 0;
-    size.x = 320;
-    size.y = 240;
+    size.x = 640;
+    size.y = 480;
     setMouseTracking(1);
 }
 
 void WorkspaceWidget::loadImage(QString name)
 {
     img.load(name);
+    size.x = img.size().width();
+    size.y = img.size().height();
 }
 
 vec2 WorkspaceWidget::mapCursorToTool(float x, float y)
@@ -104,8 +106,9 @@ void WorkspaceWidget::paintEvent(QPaintEvent *)
 {
     QPainter paint(this);
 
-    paint.drawImage( offset.x, offset.y, img.scaled( size.x, size.y, Qt::IgnoreAspectRatio ) );
-    paint.setPen(QPen(QColor(255,255,255)));
+    QImage si = img.scaled( size.x, size.y, Qt::IgnoreAspectRatio );
+
+    paint.drawImage( offset.x, offset.y, si );
 
     //TODO: проверки prog, wsdata, tool
 
@@ -125,6 +128,15 @@ void WorkspaceWidget::paintEvent(QPaintEvent *)
             vx = x + v.x * vf_step * vf_scale;
             vy = y + v.y * vf_step * vf_scale;
             paint.drawRect( QRect( x-1, y-1, 2, 2 ) );
+            QRgb p1 = si.pixel(i*wk,j*hk);
+            //QRgb p2 = si.pixel(vx-offset.x,vy-offset.y);
+            QColor c1 = QColor( 255 - qRed(p1), 255 - qGreen(p1), 255 - qBlue(p1) );
+            //QColor c2 = QColor( 255 - qRed(p2), 255 - qGreen(p2), 255 - qBlue(p2) );
+            //QGradient g;
+            //g.setColorAt( 0, c1 );
+            //g.setColorAt( 1, c2 );
+            //paint.setPen( QPen( QBrush( g ), 1 ) );
+            paint.setPen( QPen( c1 ) );
             paint.drawLine( x, y, vx, vy );
         }
     }
