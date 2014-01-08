@@ -8,11 +8,13 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "program.h"
+
 namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public Program
 {
     Q_OBJECT
 protected:
@@ -22,6 +24,8 @@ protected:
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+    WSData* getWSData();
+    Tool* getTool();
     ~MainWindow();
 
 private:

@@ -16,11 +16,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     workspacewidget.cpp \
     wsdata.cpp \
-    tool.cpp
+    tool.cpp \
+    program.cpp
 
 HEADERS  += mainwindow.h \
     workspacewidget.h \
     wsdata.h \
-    tool.h
+    tool.h \
+    program.h
 
 FORMS    += mainwindow.ui

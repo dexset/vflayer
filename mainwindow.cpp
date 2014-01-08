@@ -7,10 +7,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     wsdata = new WSData( 800, 600 );
-    ws = new WorkspaceWidget(this, wsdata);
+    ws = new WorkspaceWidget(this, this);
     tool = new Tool;
     tool->setData(wsdata);
-    ws->setTool( tool );
     ws->loadImage(QString("img.jpg"));
     ui->horizontalLayout->addWidget(ws);
     this->connect(ui->actionSave,SIGNAL(activated()),SLOT(saveToFile()));
@@ -32,6 +31,7 @@ void MainWindow::loadImageFromFile()
     if(fname == QString(""))
         return;
     ws->loadImage(QString(fname));
+
     update();
 }
 
@@ -42,7 +42,8 @@ void MainWindow::saveToFile()
         return;
     FILE* f;
     f = fopen( fname.toUtf8().constData(), "wb" );
-    int w, h, s;
+    int w, h;
+    size_t s;
     w = wsdata->width();
     h = wsdata->height();
     s = sizeof(vec2);
@@ -67,17 +68,22 @@ void MainWindow::loadFromFile()
         return;
     FILE* f;
     f = fopen( fname.toUtf8().constData(), "rb" );
-    int w, h, s;
+    int w, h;
+    size_t s;
     fread( &w, sizeof(int), 1, f );
     fread( &h, sizeof(int), 1, f );
+    fread( &s, sizeof(size_t), 1, f);
     if( wsdata )
         delete wsdata;
-    wsdata = new WSData( 800, 600 );
-    fread( &s, sizeof(size_t), 1, f);
+    wsdata = new WSData( w, h );
     fread( wsdata->getData(), sizeof(vec2), wsdata->width() * wsdata->height(), f );
     fclose(f);
+
     update();
 }
+
+WSData* MainWindow::getWSData() { return wsdata; }
+Tool* MainWindow::getTool() { return tool; }
 
 MainWindow::~MainWindow()
 {

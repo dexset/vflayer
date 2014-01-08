@@ -9,6 +9,13 @@ struct vec2
     vec2( float X=0, float Y=0 ): x(X), y(Y) {}
 };
 
+struct ivec2
+{
+    int x, y;
+    ivec2( int X=0, int Y=0 ): x(X), y(Y) {}
+    ivec2( const vec2& p ): x(p.x), y(p.y) {}
+};
+
 class WSData
 {
 protected:
