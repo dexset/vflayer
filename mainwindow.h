@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QMouseEvent>
 
+#include <workspacewidget.h>
+
 namespace Ui {
 class MainWindow;
 }
@@ -11,14 +13,14 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+protected:
+    WorkspaceWidget *ws;
+    WSData *wsdata;
+    Tool *tool;
 
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
-protected:
-    void mouseMoveEvent(QMouseEvent*);
-    void mousePressEvent(QMouseEvent*);
 
 private:
     Ui::MainWindow *ui;

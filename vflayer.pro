@@ -13,8 +13,14 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    workspacewidget.cpp \
+    wsdata.cpp \
+    tool.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    workspacewidget.h \
+    wsdata.h \
+    tool.h
 
 FORMS    += mainwindow.ui
