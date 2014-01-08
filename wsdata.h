@@ -29,6 +29,8 @@ public:
 
     void setVector( int x, int y, const vec2& v ) { data[y*w+x] = v; }
 
+    vec2* getData(){ return data; }
+
     ~WSData()
     {
         delete data;

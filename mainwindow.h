@@ -5,6 +5,7 @@
 #include <QMouseEvent>
 
 #include <workspacewidget.h>
+#include <QFileDialog>
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +25,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
+public slots:
+    void saveToFile();
+    void loadFromFile();
 };
 
 #endif // MAINWINDOW_H
