@@ -19,7 +19,6 @@ public:
 protected:
     void mouseMoveEvent(QMouseEvent*);
     void mousePressEvent(QMouseEvent*);
-    void paintEvent(QPaintEvent*);
 
 private:
     Ui::MainWindow *ui;

@@ -3,7 +3,6 @@
 #include <QPicture>
 #include <QPainter>
 #include <QImage>
-QImage img;
 
 #include <cstdio>
 
@@ -13,6 +12,13 @@ struct vec2 { float x=0, y=0; };
 #define HEIGHT 600
 
 vec2 vdata[WIDTH*HEIGHT];
+QImage img;
+
+class MWidget : QWidget
+{
+protected:
+    void paintEvent(QPaintEvent*);
+};
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     img.load(QString("img.jpg"));
+    ui->horizontalLayout->addWidget((QWidget*)(new MWidget));
 }
 
 vec2 oldpos;
@@ -60,7 +67,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *me)
     update();
 }
 
-void MainWindow::paintEvent(QPaintEvent*)
+void MWidget::paintEvent(QPaintEvent*)
 {
     QPainter paint(this);
     paint.drawImage(0,0,img.scaled(800,600,Qt::IgnoreAspectRatio));
