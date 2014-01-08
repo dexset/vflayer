@@ -59,6 +59,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOpenImage"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionExit"/>
@@ -82,7 +83,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
    <property name="text">
-    <string>Open</string>
+    <string>OpenVField</string>
    </property>
   </action>
   <action name="actionSave">
@@ -93,6 +94,11 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionOpenImage">
+   <property name="text">
+    <string>OpenImage</string>
    </property>
   </action>
  </widget>

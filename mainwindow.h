@@ -6,6 +6,7 @@
 
 #include <workspacewidget.h>
 #include <QFileDialog>
+#include <QMessageBox>
 
 namespace Ui {
 class MainWindow;
@@ -26,6 +27,7 @@ public:
 private:
     Ui::MainWindow *ui;
 public slots:
+    void loadImageFromFile();
     void saveToFile();
     void loadFromFile();
 };

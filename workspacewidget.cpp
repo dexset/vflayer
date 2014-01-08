@@ -9,7 +9,13 @@ WorkspaceWidget::WorkspaceWidget(QWidget *parent, WSData *ws) :
     h = wsdata->height();
 }
 
-void WorkspaceWidget::loadImage(QString name) { img.load(name); }
+void WorkspaceWidget::loadImage(QString name)
+{
+    img.load(name);
+    if( wsdata )
+        delete wsdata;
+    wsdata = new WSData( 800, 600 );
+}
 
 void WorkspaceWidget::setTool( Tool *t ) { tool = t; }
 
