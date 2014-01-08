@@ -91,16 +91,15 @@ void WorkspaceWidget::mouseMoveEvent(QMouseEvent *me)
     {
         Tool *tool = prog->getTool();
         if( tool ) tool->action( npos, oldpos );
-        update();
     }
     else if( mode == 2 )
     {
         offset.x += me->x() - m_oldpos.x;
         offset.y += me->y() - m_oldpos.y;
-        update();
     }
     oldpos = npos;
     m_oldpos = vec2( me->x(), me->y() );
+    update();
 }
 
 void WorkspaceWidget::paintEvent(QPaintEvent *)
@@ -141,4 +140,5 @@ void WorkspaceWidget::paintEvent(QPaintEvent *)
             paint.drawLine( x, y, vx, vy );
         }
     }
+    prog->getTool()->draw(paint, m_oldpos);
 }

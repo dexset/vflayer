@@ -6,6 +6,7 @@
 #include <cstdio>
 
 #include <QString>
+#include <QPainter>
 
 #include <vector>
 
@@ -47,6 +48,8 @@ public:
     virtual void setSetting( const Setting& s ) = 0;
 
     virtual void action( const vec2& cur, const vec2& old ) = 0;
+
+    virtual void draw( QPainter& p, vec2 v ) = 0;
 };
 
 class Brush: public Tool
@@ -104,21 +107,33 @@ public:
                 int tx = px+i;
                 int ty = py+j;
 
-
                 if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
                 {
-                    float v = rad - sqrt(i*i+j*j);
-                    float kk = force * 0.01 * ( v > 0 ? v : 0 ) / rad;
-
                     vec2 vv = wsdata->getVector(tx, ty);
+                    if( force == 0 )
+                    {
+                        float l = sqrt( vv.x*vv.x + vv.y*vv.y );
+                        vv.x += dx / 2.0;
+                        vv.y += dy / 2.0;
+                        float tml = sqrt( vv.x*vv.x + vv.y * vv.y );
+                        if( tml == 0 ) continue;
+                        vv.x = vv.x / tml * l;
+                        vv.y = vv.y / tml * l;
+                    }
+                    else
+                    {
+                        float v = rad - sqrt(i*i+j*j);
+                        float kk = force * 0.01 * ( v > 0 ? v : 0 ) / rad;
 
-                    vv.x += dx * kk;
-                    vv.y += dy * kk;
-
+                        vv.x += dx * kk;
+                        vv.y += dy * kk;
+                    }
                     wsdata->setVector(tx,ty,vv);
                 }
             }
     }
+
+    void draw( QPainter &p, const vec2 v ){ p.drawEllipse( v.x - rad, v.y - rad, rad*2, rad*2 ); }
 };
 
 class Scaler: public Brush
@@ -168,6 +183,7 @@ public:
                 }
             }
     }
+    void draw( QPainter &p, const vec2 v ){ p.drawEllipse( v.x - rad, v.y - rad, rad*2, rad*2 ); }
 };
 
 #endif // TOOL_H
