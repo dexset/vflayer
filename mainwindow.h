@@ -21,6 +21,7 @@ protected:
     WorkspaceWidget *ws;
     WSData *wsdata;
     Comb *comb;
+    CombNS *combns;
     Scaler *scaler;
     Tool *curtool;
 
@@ -40,6 +41,7 @@ public slots:
     void loadFromFile();
     void saveAndQuit();
     void selectComb(bool);
+    void selectCombNS(bool);
     void selectScaler(bool);
     void updateTool( const Setting& s);
 };

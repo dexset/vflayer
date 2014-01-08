@@ -12,10 +12,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ws = new WorkspaceWidget(this, this);
 
     comb = new Comb(5, 50);
-    comb->setData(wsdata);
+
+    combns = new CombNS(5, 50);
 
     scaler = new Scaler(3, 60);
-    scaler->setData(wsdata);
 
     setCurTool( comb );
 
@@ -107,6 +107,7 @@ void MainWindow::loadFromFile()
 void MainWindow::setCurTool( Tool *nt )
 {
     curtool = nt;
+    curtool->setData(wsdata);
 
     QLayoutItem *item;
     while( ( item = ui->settingGroup->layout()->takeAt(0) ) != NULL )
@@ -132,6 +133,7 @@ void MainWindow::updateTool(const Setting &s)
 }
 
 void MainWindow::selectComb(bool v) { if( v ) setCurTool( comb ); }
+void MainWindow::selectCombNS(bool v) { if( v ) setCurTool( combns ); }
 void MainWindow::selectScaler(bool v) { if( v ) setCurTool( scaler ); }
 
 WSData* MainWindow::getWSData() { return wsdata; }

@@ -89,6 +89,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QRadioButton" name="radioButton_3">
+           <property name="text">
+            <string>cmbNS</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QRadioButton" name="radioButton">
            <property name="text">
             <string>scaler</string>
@@ -184,7 +191,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>444</x>
-     <y>124</y>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>608</x>
@@ -192,9 +199,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>radioButton_3</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>selectCombNS(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>411</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>98</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>selectComb(bool)</slot>
   <slot>selectScaler(bool)</slot>
+  <slot>selectCombNS(bool)</slot>
  </slots>
 </ui>

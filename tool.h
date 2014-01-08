@@ -55,86 +55,74 @@ public:
 class Brush: public Tool
 {
 public:
-    float rad;
-    Brush( float R=50 ): rad(R) { }
+    Setting rad, force;
+    Brush( float F, float R=50 ):
+        force(QString("force"),0,50,F),
+        rad(QString("radius"),0,50,R)
+    {}
 
     virtual void setSetting(const Setting &s)
     {
         if( s.name == QString("radius") )
-            rad = s.val;
+            rad.val = s.val;
+        else if( s.name == QString("force") )
+            force.val = s.val;
     }
 
     SettingList getSettings()
     {
         SettingList sm;
-        sm.push_back( Setting( QString("radius"), 0, 200, rad ) );
+        sm.push_back( rad );
+        sm.push_back( force );
         return sm;
     }
 
-    void draw( QPainter &p, const vec2& v, const vec2& s ){ p.drawEllipse( v.x - rad * s.x, v.y - rad * s.y, rad*2 * s.x, rad*2 * s.y ); }
+    void draw( QPainter &p, const vec2& v, const vec2& s )
+    {
+        float rx = rad.val * s.x;
+        float ry = rad.val * s.y;
+        p.drawEllipse( v.x - rx, v.y - ry, rx * 2, ry * 2 );
+    }
 };
 
 class Comb: public Brush
 {
 public:
-    float force;
 
-    Comb( float F=5, float R=50 ): Brush(R), force(F) { }
-
-    void setSetting( const Setting &s )
+    Comb( float F=5, float R=50 ): Brush(F, R)
     {
-        if( s.name == QString("force") ) force = s.val;
-        else this->Brush::setSetting(s);
-    }
-
-    SettingList getSettings()
-    {
-        SettingList sm = this->Brush::getSettings();
-        sm.push_back( Setting( QString("force"), 0, 100, force ) );
-        return sm;
     }
 
     void action( const vec2& cur, const vec2& old )
     {
-
         float px = cur.x;
         float py = cur.y;
 
         float dx = px - old.x;
         float dy = py - old.y;
 
-        for( int i=-rad; i<rad; ++i)
-            for( int j=-rad; j<rad; ++j )
+        float r = rad.val;
+        float f = force.val;
+
+        if( r < 0.01 ) return;
+
+        for( int i=-r; i<r; ++i)
+            for( int j=-r; j<r; ++j )
             {
                 int tx = px+i;
                 int ty = py+j;
 
-                float v = ( rad - sqrt(i*i+j*j+1) ) / rad;
-                float kk = 0.01 * ( v > 0 ? v : 0 ) ;
-
                 if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
                 {
-                    vec2 vv = wsdata->getVector(tx, ty);
-                    if( force == 0 )
-                    {
-                        float l = sqrt( vv.x * vv.x + vv.y * vv.y );
-                        if( l == 0 ) continue;
-                        vv.x /= l;
-                        vv.y /= l;
-                        vv.x += dx * kk;
-                        vv.y += dy * kk;
-                        float l2 = sqrt( vv.x * vv.x + vv.y * vv.y );
-                        if( l2 == 0 ) continue;
-                        vv.x = vv.x / l2 * l;
-                        vv.y = vv.y / l2 * l;
-                    }
-                    else
-                    {
-                        kk *= force;
 
-                        vv.x += dx * kk;
-                        vv.y += dy * kk;
-                    }
+                    float v = ( r - sqrt(i*i+j*j+1) ) / r;
+                    float kk = f * 0.01 * ( v > 0 ? v : 0 ) ;
+
+                    vec2 vv = wsdata->getVector(tx, ty);
+
+                    vv.x += dx * kk;
+                    vv.y += dy * kk;
+
                     wsdata->setVector(tx,ty,vv);
                 }
             }
@@ -145,21 +133,11 @@ public:
 class Scaler: public Brush
 {
 public:
-    float coef;
 
-    Scaler( float C=0.5, float R=50 ): Brush(R), coef(C) {}
-
-    void setSetting( const Setting &s )
+    Scaler( float F=0.5, float R=50 ): Brush(F, R)
     {
-        if( s.name == QString("coef") ) coef = s.val;
-        else this->Brush::setSetting(s);
-    }
-
-    SettingList getSettings()
-    {
-        SettingList sm = this->Brush::getSettings();
-        sm.push_back( Setting( QString("coef"), -25, 25, coef ) );
-        return sm;
+        force.min = -25;
+        force.max =  25;
     }
 
     void action( const vec2& cur, const vec2& )
@@ -167,16 +145,19 @@ public:
         int px = cur.x;
         int py = cur.y;
 
-        for( int i=-rad; i<rad; ++i)
-            for( int j=-rad; j<rad; ++j )
+        float f = force.val;
+        float r = rad.val;
+
+        for( int i=-r; i<r; ++i)
+            for( int j=-r; j<r; ++j )
             {
                 int tx = px+i;
                 int ty = py+j;
 
                 if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
                 {
-                    float v = rad - sqrt(i*i+j*j);
-                    float kk = coef * 0.01 * ( v > 0 ? v : 0 ) / rad;
+                    float v = ( r - sqrt(i*i+j*j) ) / r;
+                    float kk = f * 0.01 * ( v > 0 ? v : 0 );
 
                     vec2 vv = wsdata->getVector(tx, ty);
 
@@ -189,6 +170,58 @@ public:
                 }
             }
     }
+};
+
+class CombNS: public Brush
+{
+public:
+
+    CombNS( float F=5, float R=50 ): Brush(F, R) { }
+
+    void action( const vec2& cur, const vec2& old )
+    {
+        float px = cur.x;
+        float py = cur.y;
+
+        float dx = px - old.x;
+        float dy = py - old.y;
+
+        float r = rad.val;
+        float f = force.val;
+
+        for( int i=-r; i<r; ++i)
+            for( int j=-r; j<r; ++j )
+            {
+                int tx = px+i;
+                int ty = py+j;
+
+                if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
+                {
+                    float v = ( r - sqrt(i*i+j*j+1) ) / r;
+                    float kk = f * 0.01 * ( v > 0 ? v : 0 );
+
+                    vec2 vv = wsdata->getVector(tx, ty);
+
+                    float l = sqrt( vv.x * vv.x + vv.y * vv.y );
+                    if( l == 0 ) continue;
+
+                    vv.x /= l;
+                    vv.y /= l;
+
+                    vv.x += dx * kk;
+                    vv.y += dy * kk;
+
+                    float l2 = sqrt( vv.x * vv.x + vv.y * vv.y );
+                    if( l2 == 0 ) continue;
+
+                    vv.x = vv.x / l2 * l;
+                    vv.y = vv.y / l2 * l;
+
+                    wsdata->setVector(tx,ty,vv);
+                }
+            }
+    }
+
 };
 
 #endif // TOOL_H
