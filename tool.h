@@ -54,11 +54,15 @@ public:
 
 class Brush: public Tool
 {
+protected:
+    virtual void brush_action( const vec2& p, const vec2& d, float r, float f, int i, int j ) = 0;
+
 public:
     Setting rad, force;
+
     Brush( float F, float R=50 ):
         force(QString("force"),0,50,F),
-        rad(QString("radius"),0,50,R)
+        rad(QString("radius"),0,200,R)
     {}
 
     virtual void setSetting(const Setting &s)
@@ -77,6 +81,26 @@ public:
         return sm;
     }
 
+    void action( const vec2& cur, const vec2& old )
+    {
+        vec2 dist( cur.x - old.x, cur.y - old.y );
+
+        float r = rad.val;
+        float f = force.val;
+
+        if( r < 0.01 ) return;
+
+        for( int i = -r+1; i < r; ++i )
+            for( int j = -r+1; j < r; ++j )
+            {
+                int tx = cur.x+i;
+                int ty = cur.y+j;
+
+                if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
+                    brush_action( cur, dist, r, f, i, j );
+            }
+    }
+
     void draw( QPainter &p, const vec2& v, const vec2& s )
     {
         float rx = rad.val * s.x;
@@ -87,51 +111,49 @@ public:
 
 class Comb: public Brush
 {
+protected:
+    void brush_action(const vec2 &p, const vec2 &d, float r, float f, int i, int j)
+    {
+        int tx = p.x+i;
+        int ty = p.y+j;
+
+        float v = ( r - sqrt(i*i+j*j+1) ) / r;
+        float kk = f * 0.01 * ( v > 0 ? v : 0 ) ;
+
+        vec2 vv = wsdata->getVector(tx, ty);
+
+        vv.x += d.x * kk;
+        vv.y += d.y * kk;
+
+        wsdata->setVector(tx,ty,vv);
+    }
+
 public:
 
-    Comb( float F=5, float R=50 ): Brush(F, R)
-    {
-    }
-
-    void action( const vec2& cur, const vec2& old )
-    {
-        float px = cur.x;
-        float py = cur.y;
-
-        float dx = px - old.x;
-        float dy = py - old.y;
-
-        float r = rad.val;
-        float f = force.val;
-
-        if( r < 0.01 ) return;
-
-        for( int i=-r; i<r; ++i)
-            for( int j=-r; j<r; ++j )
-            {
-                int tx = px+i;
-                int ty = py+j;
-
-                if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
-                {
-
-                    float v = ( r - sqrt(i*i+j*j+1) ) / r;
-                    float kk = f * 0.01 * ( v > 0 ? v : 0 ) ;
-
-                    vec2 vv = wsdata->getVector(tx, ty);
-
-                    vv.x += dx * kk;
-                    vv.y += dy * kk;
-
-                    wsdata->setVector(tx,ty,vv);
-                }
-            }
-    }
-
+    Comb( float F=5, float R=50 ): Brush(F, R) { }
 };
 
 class Scaler: public Brush
 {
+protected:
+    void brush_action(const vec2 &p, const vec2 &d, float r, float f, int i, int j)
+    {
+        int tx = p.x+i;
+        int ty = p.y+j;
+
+        float v = ( r - sqrt(i*i+j*j) ) / r;
+        float kk = f * 0.01 * ( v > 0 ? v : 0 );
+
+        vec2 vv = wsdata->getVector(tx, ty);
+
+        float vl = sqrt(vv.x * vv.x + vv.y * vv.y + 1);
+
+        vv.x += vv.x / vl * kk;
+        vv.y += vv.y / vl * kk;
+
+        wsdata->setVector(tx,ty,vv);
+    }
+
 public:
 
     Scaler( float F=0.5, float R=50 ): Brush(F, R)
@@ -139,89 +161,42 @@ public:
         force.min = -25;
         force.max =  25;
     }
-
-    void action( const vec2& cur, const vec2& )
-    {
-        int px = cur.x;
-        int py = cur.y;
-
-        float f = force.val;
-        float r = rad.val;
-
-        for( int i=-r; i<r; ++i)
-            for( int j=-r; j<r; ++j )
-            {
-                int tx = px+i;
-                int ty = py+j;
-
-                if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
-                {
-                    float v = ( r - sqrt(i*i+j*j) ) / r;
-                    float kk = f * 0.01 * ( v > 0 ? v : 0 );
-
-                    vec2 vv = wsdata->getVector(tx, ty);
-
-                    float vl = sqrt(vv.x * vv.x + vv.y * vv.y + 1);
-
-                    vv.x += vv.x / vl * kk;
-                    vv.y += vv.y / vl * kk;
-
-                    wsdata->setVector(tx,ty,vv);
-                }
-            }
-    }
 };
 
 class CombNS: public Brush
 {
+protected:
+    void brush_action(const vec2 &p, const vec2 &d, float r, float f, int i, int j)
+    {
+        int tx = p.x+i;
+        int ty = p.y+j;
+
+        float v = ( r - sqrt(i*i+j*j+1) ) / r;
+        float kk = f * 0.01 * ( v > 0 ? v : 0 );
+
+        vec2 vv = wsdata->getVector(tx, ty);
+
+        float l = sqrt( vv.x * vv.x + vv.y * vv.y );
+        if( l == 0 ) return;
+
+        vv.x /= l;
+        vv.y /= l;
+
+        vv.x += d.x * kk;
+        vv.y += d.y * kk;
+
+        float l2 = sqrt( vv.x * vv.x + vv.y * vv.y );
+        if( l2 == 0 ) return;
+
+        vv.x = vv.x / l2 * l;
+        vv.y = vv.y / l2 * l;
+
+        wsdata->setVector(p.x+i,p.y+j,vv);
+    }
+
 public:
 
     CombNS( float F=5, float R=50 ): Brush(F, R) { }
-
-    void action( const vec2& cur, const vec2& old )
-    {
-        float px = cur.x;
-        float py = cur.y;
-
-        float dx = px - old.x;
-        float dy = py - old.y;
-
-        float r = rad.val;
-        float f = force.val;
-
-        for( int i=-r; i<r; ++i)
-            for( int j=-r; j<r; ++j )
-            {
-                int tx = px+i;
-                int ty = py+j;
-
-                if( tx >= 0 && tx < wsdata->width() && ty >= 0 && ty < wsdata->height() )
-                {
-                    float v = ( r - sqrt(i*i+j*j+1) ) / r;
-                    float kk = f * 0.01 * ( v > 0 ? v : 0 );
-
-                    vec2 vv = wsdata->getVector(tx, ty);
-
-                    float l = sqrt( vv.x * vv.x + vv.y * vv.y );
-                    if( l == 0 ) continue;
-
-                    vv.x /= l;
-                    vv.y /= l;
-
-                    vv.x += dx * kk;
-                    vv.y += dy * kk;
-
-                    float l2 = sqrt( vv.x * vv.x + vv.y * vv.y );
-                    if( l2 == 0 ) continue;
-
-                    vv.x = vv.x / l2 * l;
-                    vv.y = vv.y / l2 * l;
-
-                    wsdata->setVector(tx,ty,vv);
-                }
-            }
-    }
-
 };
 
 #endif // TOOL_H
