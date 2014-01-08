@@ -17,12 +17,15 @@ SOURCES += main.cpp\
     workspacewidget.cpp \
     wsdata.cpp \
     tool.cpp \
-    program.cpp
+    program.cpp \
+    settingslider.cpp
 
 HEADERS  += mainwindow.h \
     workspacewidget.h \
     wsdata.h \
     tool.h \
-    program.h
+    program.h \
+    settingslider.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    settingslider.ui

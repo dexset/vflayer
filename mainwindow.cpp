@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "settingslider.h"
+#include <QSpacerItem>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -8,13 +10,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     wsdata = new WSData( 800, 600 );
     ws = new WorkspaceWidget(this, this);
-    tool = new Tool;
-    tool->setData(wsdata);
+
+    comb = new Comb(5, 50);
+    comb->setData(wsdata);
+
+    scaler = new Scaler(3, 60);
+    scaler->setData(wsdata);
+
+    setCurTool( comb );
+
     ws->loadImage(QString("img.jpg"));
-    ui->horizontalLayout->addWidget(ws);
+    ui->mainLayout->addWidget(ws);
     this->connect(ui->actionSave,SIGNAL(activated()),SLOT(saveToFile()));
     this->connect(ui->actionOpen,SIGNAL(activated()),SLOT(loadFromFile()));
     this->connect(ui->actionOpenImage,SIGNAL(activated()),SLOT(loadImageFromFile()));
+
 }
 
 void MainWindow::loadImageFromFile()
@@ -82,13 +92,44 @@ void MainWindow::loadFromFile()
     update();
 }
 
+void MainWindow::setCurTool( Tool *nt )
+{
+    curtool = nt;
+
+    QLayoutItem *item;
+    while( ( item = ui->settingGroup->layout()->takeAt(0) ) != NULL )
+    {
+        delete item->widget();
+        delete item;
+    }
+
+    SettingList sm = curtool->getSettings();
+
+    for( SettingList::iterator i = sm.begin(); i != sm.end(); ++i )
+    {
+        SettingSlider* ss = new SettingSlider(this);
+        ss->setSetting( (*i) );
+        ui->settingGroup->layout()->addWidget( ss );
+        this->connect(ss, SIGNAL(updateSetting( const Setting& )), SLOT(updateTool( const Setting& )) );
+    }
+}
+
+void MainWindow::updateTool(const Setting &s)
+{
+    curtool->setSetting(s);
+}
+
+void MainWindow::selectComb(bool v) { if( v ) setCurTool( comb ); }
+void MainWindow::selectScaler(bool v) { if( v ) setCurTool( scaler ); }
+
 WSData* MainWindow::getWSData() { return wsdata; }
-Tool* MainWindow::getTool() { return tool; }
+Tool* MainWindow::getTool() { return curtool; }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     delete wsdata;
     delete ws;
-    delete tool;
+    delete comb;
+    delete scaler;
 }

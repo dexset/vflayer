@@ -20,7 +20,11 @@ class MainWindow : public QMainWindow, public Program
 protected:
     WorkspaceWidget *ws;
     WSData *wsdata;
-    Tool *tool;
+    Comb *comb;
+    Scaler *scaler;
+    Tool *curtool;
+
+    void setCurTool( Tool *nt );
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -34,6 +38,9 @@ public slots:
     void loadImageFromFile();
     void saveToFile();
     void loadFromFile();
+    void selectComb(bool);
+    void selectScaler(bool);
+    void updateTool( const Setting& s);
 };
 
 #endif // MAINWINDOW_H
